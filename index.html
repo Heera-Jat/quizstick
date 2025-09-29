@@ -1,313 +1,122 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>FlexQuiz — Single File Responsive Quiz</title>
-  <meta name="description" content="Mobile and desktop-friendly single-file quiz app." />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Flex Quiz</title>
   <style>
-    /* Basic reset */
-    *,*::before,*::after{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      background:linear-gradient(180deg,#f6f7fb 0%,#fff 100%);
-      color:#0f1724;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:24px;
-    }
-
-    /* Container */
-    .card {
-      width:100%;
-      max-width:900px;
-      background:white;
-      border-radius:16px;
-      box-shadow:0 8px 30px rgba(2,6,23,0.08);
-      padding:20px;
-      display:flex;
-      flex-direction:column;
-      gap:18px;
-    }
-
-    header h1{margin:0;font-size:1.45rem}
-    header p{margin:0;color:#475569;font-size:0.95rem}
-
-    /* Start / controls */
-    .start-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-    .btn{
-      appearance:none;border:0;padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer;
-      background:#4f46e5;color:white;box-shadow:0 6px 18px rgba(79,70,229,0.15);
-    }
-    .btn.secondary{background:#e6eefc;color:#0f1724;box-shadow:none;border:1px solid #e6eefc}
-    .small{padding:8px 10px;font-size:0.92rem;border-radius:8px}
-
-    /* Quiz area */
-    .quiz {
-      display:flex;
-      gap:20px;
-      align-items:flex-start;
-      flex-direction:column;
-    }
-
-    .meta {
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      color:#475569;
-      font-size:0.92rem;
-    }
-
-    .progress {
-      height:10px;
-      background:#eef2ff;
-      border-radius:999px;
-      overflow:hidden;
-      flex:1;
-      margin-left:12px;
-    }
-    .progress > i{
-      display:block;height:100%;background:linear-gradient(90deg,#7c3aed,#4f46e5);width:0%;
-      transition:width 350ms ease;
-    }
-
-    .question {
-      background:#f8fafc;border:1px solid #eef2ff;padding:16px;border-radius:12px;
-    }
-    .qtext{font-size:1.05rem;margin-bottom:12px}
-    .options{display:grid;gap:10px}
-    .option{
-      display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;border:1px solid #e6eefc;
-      background:white;cursor:pointer;transition:transform 120ms ease,box-shadow 120ms ease;
-      user-select:none;
-    }
-    .option:hover{transform:translateY(-3px);box-shadow:0 6px 18px rgba(15,23,36,0.06)}
-    .letter{min-width:36px;height:36px;border-radius:8px;display:grid;place-items:center;background:#f1f5f9;font-weight:700}
-    .option.correct{border-color:#d1fae5;background:#ecfdf5}
-    .option.wrong{border-color:#fee2e2;background:#fff1f2;opacity:0.95}
-
-    /* Footer / results */
-    .results {
-      text-align:center;padding:18px;border-radius:12px;background:#fff7ed;border:1px solid #ffedd5;
-    }
-    .big{font-size:1.6rem;font-weight:800;color:#0f1724}
-    .muted{color:#475569}
-
-    /* Responsive two-column layout on larger screens */
-    @media(min-width:860px){
-      .quiz{flex-direction:row}
-      .left{flex:1}
-      .right{width:320px}
-    }
-
-    /* small helpers */
-    .muted-sm{font-size:0.9rem;color:#6b7280}
-    .center{display:flex;align-items:center;justify-content:center}
-    .tiny{font-size:0.85rem;color:#475569}
-    .controls{display:flex;gap:10px;flex-wrap:wrap}
-    .hidden{display:none}
-    .footer{font-size:0.82rem;color:#94a3b8;text-align:center;padding-top:6px}
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f9fafb; }
+    .container { max-width: 600px; margin: 2rem auto; background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    h1, h2 { text-align: center; }
+    button { background: #4f46e5; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 1rem; }
+    button:hover { background: #4338ca; }
+    .option { display: block; margin: 0.5rem 0; padding: 0.5rem 1rem; background: #e0e7ff; border-radius: 8px; cursor: pointer; }
+    .option:hover { background: #c7d2fe; }
+    .hidden { display: none; }
+    .center { text-align: center; margin-top: 1rem; }
   </style>
 </head>
 <body>
-  <main class="card" role="main" aria-labelledby="appTitle">
-    <header>
-      <h1 id="appTitle">FlexQuiz — All-in-one Quiz</h1>
-      <p>Mobile-first, desktop-friendly quiz. Save results locally. Keyboard keys: A / B / C / D to answer.</p>
-    </header>
-
-    <!-- START screen -->
-    <section id="startScreen">
-      <div style="display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap">
-        <div>
-          <h2 style="margin:0 0 6px 0">Ready to test your knowledge?</h2>
-          <div class="tiny muted-sm">Sample quiz with multiple-choice questions — customize in the JS section below.</div>
-        </div>
-        <div class="start-row">
-          <button id="btnStart" class="btn">Start Quiz</button>
-          <button id="btnLoad" class="btn secondary small">Load last score</button>
-          <button id="btnExportTemplate" class="btn secondary small">Export results (JSON)</button>
-        </div>
+  <div class="container">
+    <!-- Landing Page -->
+    <div id="landing">
+      <h1>Welcome to Flex Quiz</h1>
+      <p class="center">Test your knowledge with this quick quiz!</p>
+      <div class="center">
+        <button id="startBtn">Start Quiz</button>
       </div>
-      <div class="footer">Tip: Save this file as <strong>index.html</strong> and deploy to any static host.</div>
-    </section>
+    </div>
 
-    <!-- QUIZ area -->
-    <section id="quizArea" class="quiz hidden" aria-hidden="true">
-      <div class="left">
-        <div class="meta" aria-live="polite">
-          <div><strong id="metaQ">Question 1</strong> <span id="metaTotal" class="muted-sm">/ 10</span></div>
-          <div style="display:flex;align-items:center;gap:10px">
-            <div class="tiny muted-sm">Score: <strong id="metaScore">0</strong></div>
-            <div class="progress" aria-hidden="true"><i id="progressBar"></i></div>
-          </div>
-        </div>
-
-        <div id="questionCard" class="question" role="group" aria-labelledby="qLabel" tabindex="0">
-          <div id="qLabel" class="qtext">Question text goes here</div>
-          <div class="options" id="optionsList" role="list"></div>
-        </div>
-
-        <div style="display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:12px;flex-wrap:wrap">
-          <div class="tiny muted-sm" id="hintText">Use keyboard or tap an option.</div>
-          <div class="controls">
-            <button id="btnPrev" class="btn secondary small">Prev</button>
-            <button id="btnNext" class="btn secondary small">Skip</button>
-          </div>
-        </div>
+    <!-- Quiz Page -->
+    <div id="quiz" class="hidden">
+      <h2 id="question"></h2>
+      <div id="options"></div>
+      <div class="center">
+        <button id="nextBtn" class="hidden">Next</button>
       </div>
+    </div>
 
-      <aside class="right">
-        <div class="results" id="miniResults" aria-live="polite">
-          <div class="muted-sm">Progress</div>
-          <div style="display:flex;align-items:center;gap:12px;margin-top:8px;justify-content:center">
-            <div style="font-weight:800;font-size:1.25rem" id="resultScore">0</div>
-            <div class="muted-sm"> / <span id="resultTotal">10</span></div>
-          </div>
-          <div style="margin-top:8px" class="muted-sm">Percentage: <strong id="resultPct">0%</strong></div>
-          <div style="margin-top:12px;display:flex;gap:8px;justify-content:center">
-            <button id="btnFinish" class="btn small">Finish</button>
-            <button id="btnRestart" class="btn secondary small">Restart</button>
-          </div>
-        </div>
-
-        <div style="margin-top:14px;padding:12px;border-radius:10px;background:#f8fafc;border:1px solid #eef2ff" class="tiny muted-sm">
-          <div style="font-weight:700;margin-bottom:6px">Controls</div>
-          <ul style="margin:0;padding-left:18px">
-            <li>Click/tap an option to answer</li>
-            <li>Use <strong>A/B/C/D</strong> for quick answers</li>
-            <li>Progress is saved locally</li>
-          </ul>
-        </div>
-      </aside>
-    </section>
-
-    <!-- RESULT screen -->
-    <section id="resultScreen" class="hidden" aria-hidden="true">
-      <div style="display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap">
-        <div>
-          <div class="muted-sm">Finished</div>
-          <div class="big" id="finalScoreBig">0 / 10</div>
-          <div class="muted-sm">Percentage: <strong id="finalPct">0%</strong></div>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <button id="btnSave" class="btn small">Save result</button>
-          <button id="btnDownload" class="btn secondary small">Download JSON</button>
-          <button id="btnBack" class="btn secondary small">Home</button>
-        </div>
-      </div>
-      <div style="margin-top:12px" class="muted-sm" id="savedNote"></div>
-    </section>
-  </main>
+    <!-- Results Page -->
+    <div id="results" class="hidden center">
+      <h2>Your Results</h2>
+      <p id="scoreText"></p>
+      <button id="restartBtn">Restart Quiz</button>
+    </div>
+  </div>
 
   <script>
-    /****************************************************************
-     * FlexQuiz single-file app
-     * - Edit QUESTIONS below to customize quiz
-     * - Save as index.html and open in browser / deploy as static file
-     ****************************************************************/
-
-    // ----- Customize your questions here -----
-    const QUESTIONS = [
-      {
-        id: 1,
-        q: "What is the capital of France?",
-        options: ["Paris","Rome","Madrid","Berlin"],
-        answer: 0
-      },
-      {
-        id: 2,
-        q: "Which language runs in a browser?",
-        options: ["Python","C++","JavaScript","Rust"],
-        answer: 2
-      },
-      {
-        id: 3,
-        q: "What does CSS stand for?",
-        options: ["Central Style Sheets","Cascading Style Sheets","Cascading Simple Sheets","Cars SUVs Sailboats"],
-        answer: 1
-      },
-      {
-        id: 4,
-        q: "Which planet is known as the Red Planet?",
-        options: ["Earth","Venus","Mars","Jupiter"],
-        answer: 2
-      },
-      {
-        id: 5,
-        q: "Accessible keyboard key for option A is which letter?",
-        options: ["A","B","C","D"],
-        answer: 0
-      }
+    const questions = [
+      { q: "What is the capital of France?", options: ["Paris","Rome","Madrid","Berlin"], answer: 0 },
+      { q: "Which language runs in a browser?", options: ["Python","C++","JavaScript","Rust"], answer: 2 },
+      { q: "What does CSS stand for?", options: ["Central Style Sheets","Cascading Style Sheets","Cascading Simple Sheets","Cars SUVs Sailboats"], answer: 1 }
     ];
-    // ------------------------------------------
 
-    // App state
-    let state = {
-      index: 0,
-      score: 0,
-      answered: {},   // id -> {selected, correct}
-      startedAt: null,
-      finishedAt: null,
+    let current = 0, score = 0;
+
+    const landing = document.getElementById("landing");
+    const quiz = document.getElementById("quiz");
+    const results = document.getElementById("results");
+    const startBtn = document.getElementById("startBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const questionEl = document.getElementById("question");
+    const optionsEl = document.getElementById("options");
+    const scoreText = document.getElementById("scoreText");
+
+    startBtn.onclick = () => {
+      landing.classList.add("hidden");
+      quiz.classList.remove("hidden");
+      loadQuestion();
     };
 
-    // Elements
-    const startScreen = document.getElementById('startScreen');
-    const quizArea = document.getElementById('quizArea');
-    const resultScreen = document.getElementById('resultScreen');
-
-    const btnStart = document.getElementById('btnStart');
-    const btnLoad = document.getElementById('btnLoad');
-    const btnExport = document.getElementById('btnExportTemplate');
-
-    const qLabel = document.getElementById('qLabel');
-    const optionsList = document.getElementById('optionsList');
-    const metaQ = document.getElementById('metaQ');
-    const metaTotal = document.getElementById('metaTotal');
-    const metaScore = document.getElementById('metaScore');
-    const progressBar = document.getElementById('progressBar');
-
-    const resultScore = document.getElementById('resultScore');
-    const resultPct = document.getElementById('resultPct');
-    const resultTotal = document.getElementById('resultTotal');
-
-    const btnPrev = document.getElementById('btnPrev');
-    const btnNext = document.getElementById('btnNext');
-    const btnFinish = document.getElementById('btnFinish');
-    const btnRestart = document.getElementById('btnRestart');
-
-    const btnSave = document.getElementById('btnSave');
-    const btnDownload = document.getElementById('btnDownload');
-    const btnBack = document.getElementById('btnBack');
-
-    const finalScoreBig = document.getElementById('finalScoreBig');
-    const finalPct = document.getElementById('finalPct');
-    const savedNote = document.getElementById('savedNote');
-
-    // Helpers
-    const TOTAL = QUESTIONS.length;
-    metaTotal.textContent = '/ ' + TOTAL;
-    resultTotal.textContent = TOTAL;
-
-    function pct(score){ return Math.round((score / TOTAL) * 100); }
-
-    function showStart(){
-      startScreen.classList.remove('hidden');
-      quizArea.classList.add('hidden'); quizArea.setAttribute('aria-hidden','true');
-      resultScreen.classList.add('hidden'); resultScreen.setAttribute('aria-hidden','true');
+    function loadQuestion() {
+      const q = questions[current];
+      questionEl.textContent = q.q;
+      optionsEl.innerHTML = "";
+      q.options.forEach((opt, i) => {
+        const div = document.createElement("div");
+        div.textContent = opt;
+        div.className = "option";
+        div.onclick = () => selectAnswer(i);
+        optionsEl.appendChild(div);
+      });
+      nextBtn.classList.add("hidden");
     }
 
-    function showQuiz(){
-      startScreen.classList.add('hidden');
-      quizArea.classList.remove('hidden'); quizArea.setAttribute('aria-hidden','false');
-      resultScreen.classList.add('hidden'); resultScreen.setAttribute('aria-hidden','true');
-      document.getElementById('questionCard').focus();
+    function selectAnswer(choice) {
+      if (choice === questions[current].answer) score++;
+      Array.from(optionsEl.children).forEach((child, i) => {
+        child.style.pointerEvents = "none";
+        if (i === questions[current].answer) child.style.background = "#34d399"; // green
+        else if (i === choice) child.style.background = "#f87171"; // red
+      });
+      nextBtn.classList.remove("hidden");
+    }
+
+    nextBtn.onclick = () => {
+      current++;
+      if (current < questions.length) {
+        loadQuestion();
+      } else {
+        showResults();
+      }
+    };
+
+    function showResults() {
+      quiz.classList.add("hidden");
+      results.classList.remove("hidden");
+      scoreText.textContent = `You scored ${score} out of ${questions.length}`;
+    }
+
+    restartBtn.onclick = () => {
+      current = 0; score = 0;
+      results.classList.add("hidden");
+      landing.classList.remove("hidden");
+    };
+  </script>
+</body>
+</html>
+
     }
 
     function showResult(){
